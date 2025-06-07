@@ -43,3 +43,11 @@ print(response.getheaders())
 #print(response.getheader("键"))可以获取对应的值,注意函数名，getheaders和getheader
 print(response.getheader('Server'))
 
+#添加用户代理伪装成浏览器访问豆瓣
+#使用urllib.request.Request()封装一个请求对象，参数包括从网页f12获取的一些键值对
+url="https://movie.douban.com/top250?start="
+headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+req=urllib.request.Request(url=url,headers=headers)
+#这时再向有反爬机制的网站发送请求
+response=urllib.request.urlopen(req)
+print(response.read().decode("utf-8"))
