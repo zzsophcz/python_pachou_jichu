@@ -11,8 +11,10 @@ def main():
     baseurl="https://movie.douban.com/top250?start="
     dataList=getData(baseurl)
     # print(dataList)
-    savePath="豆瓣电影Top250.xls"
-    saveData(dataList,savePath)
+    # savePath="豆瓣电影Top250.xls"
+    # saveData(dataList,savePath)
+    dbPath="doubanmovie250.db"
+    saveDataDB(dbPath,dataList)
 
 #获得指定的URL里的内容
 def askURL(url):
@@ -120,6 +122,51 @@ def saveData(dataList,savePath):
 
     book.save(savePath)
 
+def saveDataDB(dbPath,dataList):
+    print("调用保存到数据库中")
+    initDB(dbPath)
+    conn = sqlite3.connect(dbPath)
+    cursor = conn.cursor()
+    for data in dataList:
+        for index in range(len(data)):
+            if index==4 or index==5:
+                continue
+            data[index]='"'+data[index]+'"'
+        # sql='''
+        #     insert into movie250
+        #     (info_link, pic_url, cname, ename, score, rated, instroduction, info)
+        #     values(%s)''' %",".join(data) #join将八个值用,连接到一起
+        sql = '''
+                    insert into movie250
+                    (info_link, pic_url, cname, ename, score, rated, instroduction, info)
+                    values(?,?,?,?,?,?,?,?)'''
+        cursor.execute(sql,data)#可以使用这种方法，比视频里的简单，不需要拼接
+        conn.commit()
+    cursor.close()
+    conn.close()
+
+def initDB(dbPath):
+    sql = '''
+        create table movie250
+        (
+        id integer primary key autoincrement,
+        info_link text,
+        pic_url text,
+        cname varchar,
+        ename varchar,
+        score numeric,
+        rated numeric,
+        instroduction text,
+        info text
+        )
+        '''
+    conn=sqlite3.connect(dbPath)
+    cursor=conn.cursor()
+    cursor.execute(sql)
+    conn.commit()
+    conn.close()
+
 if __name__ == '__main__':
     main()
+    # initDB("movietest.db")
     print("爬取完毕！")
